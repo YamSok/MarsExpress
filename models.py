@@ -4,6 +4,7 @@ from preprocessing import *
 
 ## Modeling
 from sklearn.linear_model import LinearRegression
+from sklearn.ensemble import RandomForestRegressor
 from tensorflow import keras
 from tensorflow.keras import models, layers, initializers
 
@@ -13,11 +14,12 @@ from joblib import dump, load
 
 def save_model(trained_model, model_type, keras, params = ''):
     timestamp = d.datetime.now().strftime("%d-%m-%Y(%H:%M:%S)")
+    file_name = f'models/{model_type}_{params}{timestamp}.model'
     if keras:
-        trained_model.save(f'models/{model_type}_{params}{timestamp}.model')
+        trained_model.save(file_name)
     else :
-        dump(trained_model, f"models/{model_type}_{params}{timestamp}.model")
-
+        dump(trained_model, file_name)
+    print("Saved:", file_name)
 
 def build_ann(n_layers, width):
     """
@@ -61,8 +63,16 @@ def ann(X_train, y_train, n_layers, width, epochs):
 
 def reglin(X_train, y_train):
     trained_model = LinearRegression().fit(X_train, y_train)
+    save_model(trained_model, "reglin", False, "")
+
+def random_forest(X_train, y_train, n_estimators):
+    trained_model = RandomForestRegressor(n_estimators=n_estimators, random_state=0)
+    trained_model.fit(X_train, y_train)
+    params = f"({n_estimators}estimators)_"
+    save_model(trained_model, "random_forest", False, params)
 
 
 if __name__ == "__main__":
     X_train, X_test, y_train, y_test = generate_train_data("chrono")
-    ann(X_train, y_train, 16, 16, 10)
+    # ann(X_train, y_train, 16, 16, 10)
+    random_forest(X_train, y_train, 50)
