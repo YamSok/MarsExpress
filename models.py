@@ -74,5 +74,6 @@ def random_forest(X_train, y_train, n_estimators):
 
 if __name__ == "__main__":
     X_train, X_test, y_train, y_test = generate_train_data("chrono")
+    reglin(X_train, y_train)
     # ann(X_train, y_train, 16, 16, 10)
-    random_forest(X_train, y_train, 50)
+    random_forest(X_train, y_train, 5)

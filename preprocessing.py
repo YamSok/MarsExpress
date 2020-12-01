@@ -22,6 +22,25 @@ def import_file(file_name, file_type):
         data = pd.get_dummies(data[["type", "flagcomms"]]) #One Hot Encoding (naïf)
         data["flagcomms"] = data["flagcomms"].astype(int) # Passer les true/false en 1/0
         data = data.resample('60min').pad()
+    
+    elif file_type == "evtf":
+        feats_mars_occultations = ['OCC_PHOBOS', 'PHO_PENUMBRA', 'PHO_UMBRA',
+                           'MAR_PENUMBRA', 'MAR_UMBRA', 'OCC_MARS_200KM', 'OCC_MARS',
+                           'OCC_DEIMOS', 'DEI_PENUMBRA']
+        for feat in feats_mars_occultations:
+            data[feat] = data['description'].apply(lambda x: feat in str(x))
+            data[feat] = data[feat].astype(int) 
+            
+        data['UMBRA']=data['description'].apply(lambda x: '_UMBRA_START' in str(x)).astype(int) 
+        data['PENUMBRA']=data['description'].apply(lambda x: '_PENUMBRA_START' in str(x) \
+                                            or '_UMBRA_START' in str(x)\
+                                            or '_UMBRA_END' in str(x)).astype(int) 
+
+        del data["description"]
+
+        data = data.resample('60min').mean()
+
+
     else:
         data = data.resample('60min').mean()
     return data
@@ -89,24 +108,30 @@ def generate_data(train_folder, test_folder, verbose):
     Generate 3 years DataFrames for training and testing set
     """
     
-    file_types = ["saaf", "dmop", "ltdata", "ftl"]
+    file_types = [ "evtf", "saaf", "dmop", "ltdata", "ftl"]
     
     print("@@@@@@"*4) if verbose else 0
     print("Creating train dataset") if verbose else 0
     print("@@@@@@"*4) if verbose else 0
-    df_list_train = import_all_files(train_folder, ["power"] + file_types, verbose)
+
+    df_list_train = import_all_files(train_folder, ["power"] + file_types , verbose)
+
     print("@@@@@@"*4) if verbose else 0
     print("Creating test dataset") if verbose else 0
     print("@@@@@@"*4) if verbose else 0
+
     df_list_test = import_all_files(test_folder, file_types, verbose)
     
     print("@@@@@@"*4) if verbose else 0
     print("Interpolating train dataset") if verbose else 0
     print("@@@@@@"*4) if verbose else 0
+
     train = interpolate(df_list_train, verbose) 
+
     print("@@@@@@"*4) if verbose else 0
     print("Interpolating test dataset") if verbose else 0
     print("@@@@@@"*4) if verbose else 0
+
     test = interpolate(df_list_test, verbose)
     
     to_del_test = np.setdiff1d(test.columns, train.columns[33:])
@@ -120,9 +145,9 @@ def generate_data(train_folder, test_folder, verbose):
 
 def import_data():
     train_list = glob.glob(f"data/train*") 
-    train_path = train_list[0]
+    train_path = np.sort(train_list)[-1]
     test_list = glob.glob(f"data/test*") 
-    test_path = train_list[0]
+    test_path = np.sort(test_list)[-1]
     train = pd.read_pickle(train_path)
     test = pd.read_pickle(test_path)
     return train, test
