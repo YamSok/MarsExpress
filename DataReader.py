@@ -114,13 +114,13 @@ class PdData(RawData):
         print("> Importing ltdata")
         master = self.add_lt_data(master, d,no_power_sub)
         print("> Importing saaf")
-        master = self.add_saaf_data(master, d,no_power_sub)        
-        print("> Importing evtf")
-        master = self.add_evtf_data(master, d,no_power_sub)
-        print("> Importing dmop")
-        master = self.add_dmop_data(master, d,no_power_sub)
-        print("> Importing ftl")
-        master = self.add_ftl_data(master, d,no_power_sub)
+        # master = self.add_saaf_data(master, d,no_power_sub)        
+        # print("> Importing evtf")
+        # master = self.add_evtf_data(master, d,no_power_sub)
+        # print("> Importing dmop")
+        # master = self.add_dmop_data(master, d,no_power_sub)
+        # print("> Importing ftl")
+        # master = self.add_ftl_data(master, d,no_power_sub)
 
         if hourly:
             master=self.make_hourly(master)
@@ -134,6 +134,7 @@ class PdData(RawData):
         master['sunmarsearthangle_deg'] = master['sunmarsearthangle_deg'].fillna(method='ffill')
         master['eclipseduration_min'] = master['eclipseduration_min'].fillna(method='ffill')
         master['occultationduration_min'] = master['occultationduration_min'].fillna(method='ffill')
+        master = master.loc[:,~master.columns.duplicated()]
         if not no_power_sub: 
             master=master.loc[d['power'].index]
         return master
