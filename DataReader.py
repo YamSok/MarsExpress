@@ -114,13 +114,13 @@ class PdData(RawData):
         print("> Importing ltdata")
         master = self.add_lt_data(master, d,no_power_sub)
         print("> Importing saaf")
-        # master = self.add_saaf_data(master, d,no_power_sub)        
-        # print("> Importing evtf")
-        # master = self.add_evtf_data(master, d,no_power_sub)
-        # print("> Importing dmop")
-        # master = self.add_dmop_data(master, d,no_power_sub)
-        # print("> Importing ftl")
-        # master = self.add_ftl_data(master, d,no_power_sub)
+        master = self.add_saaf_data(master, d,no_power_sub)        
+        print("> Importing evtf")
+        master = self.add_evtf_data(master, d,no_power_sub)
+        print("> Importing dmop")
+        master = self.add_dmop_data(master, d,no_power_sub)
+        print("> Importing ftl")
+        master = self.add_ftl_data(master, d,no_power_sub)
 
         if hourly:
             master=self.make_hourly(master)
@@ -145,6 +145,7 @@ class PdData(RawData):
             master[i]=master[i].fillna(method='ffill')
         if not no_power_sub: 
             master=master.loc[d['power'].index]
+        master = master.loc[:,~master.columns.duplicated()]
 
         return master
     
@@ -156,6 +157,7 @@ class PdData(RawData):
         d['evtf']['ut_ms'] = d['evtf'].index
         d['evtf'].loc[d['evtf']['ut_ms'].diff() < 1, 'ut_ms'] = d['evtf'].loc[d['evtf']['ut_ms'].diff() < 1, 'ut_ms'] + 1
         d['evtf'].index=d['evtf']['ut_ms']
+
         del d['evtf']['ut_ms']
          
        
@@ -205,6 +207,7 @@ class PdData(RawData):
 
         
         
+        master = master.loc[:,~master.columns.duplicated()]
         
         return master
     
@@ -244,6 +247,8 @@ class PdData(RawData):
             master=master.loc[d['power'].index]
 
         master=master.fillna(method='bfill')
+        master = master.loc[:,~master.columns.duplicated()]
+
         return master
     
     def add_dmop_data(self, master, d, no_power_sub = False):
@@ -286,5 +291,7 @@ class PdData(RawData):
 
         master=master.fillna(method='bfill')
         master=pd.concat([master, x,y], axis=1).fillna(method='ffill').fillna(0)
+        master = master.loc[:,~master.columns.duplicated()]
+
         return master
     
