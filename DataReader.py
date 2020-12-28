@@ -62,11 +62,11 @@ class PdData(RawData):
     def make_hourly(self,df):
         print("ok")
         df['ut_ms'] = df.index
-        interesting = dependent + [x for x in df.columns if "NPWD" in x ] + ["ut_ms"]
-        for i in interesting:
-            if i not in df.columns:
-                df[i] = 0
-        df=df[interesting]
+        # interesting = [x for x in df.columns if "NPWD" in x ] + ["ut_ms"]
+        # for i in interesting:
+        #     if i not in df.columns:
+        #         df[i] = 0
+        # df=df[interesting]
         dt = pd.to_datetime(df['ut_ms'], unit='ms')
         df.index=dt
         start = dt.iloc[0].date()
@@ -80,7 +80,7 @@ class PdData(RawData):
         
         hourly=pd.concat(h,axis=1).transpose()
         hourly.index = L[:len(pairs)]
-        hourly['UMBRA_season']=pd.ewma(hourly['UMBRA_time'],240) > 10000
+        hourly['UMBRA_season']=hourly['UMBRA_time'].ewm(240) > 10000
         hourly['UMBRA_time1']=hourly['UMBRA_time'].shift(1).fillna(method='bfill')
         hourly['UMBRA_time2']=hourly['UMBRA_time'].shift(2).fillna(method='bfill')
         hourly['UMBRA_time3']=hourly['UMBRA_time'].shift(3).fillna(method='bfill')
@@ -97,11 +97,11 @@ class PdData(RawData):
         hourly.loc[hourly['thisisit'], 'mult']=-1
         
         hourly['sunmarsearthangle_deg2'] = hourly['mult'].cumprod() * hourly['sunmarsearthangle_deg']
-        del hourly['height_change']
+        # del hourly['height_change']
 
-        height_change = pd.read_pickle('height_change_hourly.pkl')
-        hourly = pd.concat([hourly, height_change], axis=1)
-        hourly['height_change'] = hourly['height_change'].fillna(0)
+        # height_change = pd.read_pickle('height_change_hourly.pkl')
+        # hourly = pd.concat([hourly, height_change], axis=1)
+        # hourly['height_change'] = hourly['height_change'].fillna(0)
         del hourly['mult']
         del hourly['thisisit']
         del hourly['ut_ms']
