@@ -60,7 +60,8 @@ class PdData(RawData):
         return d
     
     def make_hourly(self,df):
-        print("ok")
+        print(">>>>>> Make hourly")
+        print(">> Shape :", df.shape)
         df['ut_ms'] = df.index
         # interesting = [x for x in df.columns if "NPWD" in x ] + ["ut_ms"]
         # for i in interesting:
@@ -79,29 +80,39 @@ class PdData(RawData):
         h = [df[pairs[x][0]:pairs[x][1]].mean() for x in range(len(pairs))]
         
         hourly=pd.concat(h,axis=1).transpose()
+        print('>> After concat shape :', hourly.shape)
         hourly.index = L[:len(pairs)]
-        hourly['UMBRA_season']= hourly['UMBRA_time'].ewm(240).mean() > 10000
+        hourly['UMBRA_season']= hourly['UMBRA_time'].ewm(240).mean() > 10000        
         hourly['UMBRA_time1']=hourly['UMBRA_time'].shift(1).fillna(method='bfill')
         hourly['UMBRA_time2']=hourly['UMBRA_time'].shift(2).fillna(method='bfill')
         hourly['UMBRA_time3']=hourly['UMBRA_time'].shift(3).fillna(method='bfill')
+        print('>> After UMBRA :', hourly.shape)
+        
         hourly['PENUMBRA_time1']=hourly['PENUMBRA_time'].shift(1).fillna(method='bfill')
         hourly['PENUMBRA_time2']=hourly['PENUMBRA_time'].shift(2).fillna(method='bfill')
         hourly['PENUMBRA_time3']=hourly['PENUMBRA_time'].shift(3).fillna(method='bfill')
+        print('>> After PENUMBRA :', hourly.shape)
+        
         hourly['conjuction'] = (hourly['sa'].rolling(window=50, center=False).std() < 0.5) | (hourly['sunmarsearthangle_deg'].abs() < 3)
         hourly['conjuction'] = hourly['conjuction'].fillna(method='bfill')
+        print('>> After conjuction :', hourly.shape)
         
         hourly['thisisit']=(((hourly['sunmarsearthangle_deg']-hourly['sunmarsearthangle_deg'].rolling(window=300,center=True).min()).abs() < 1e-5) & (hourly['sunmarsearthangle_deg'] < hourly['sunmarsearthangle_deg'].shift(-1)-1e-6))
+        print('>> After thisisit :', hourly.shape)
 
        
         hourly['mult'] = 1
         hourly.loc[hourly['thisisit'], 'mult']=-1
         
         hourly['sunmarsearthangle_deg2'] = hourly['mult'].cumprod() * hourly['sunmarsearthangle_deg']
+        print('>> After before del :', hourly.shape)
+
         # del hourly['height_change']
 
         # height_change = pd.read_pickle('height_change_hourly.pkl')
         # hourly = pd.concat([hourly, height_change], axis=1)
         # hourly['height_change'] = hourly['height_change'].fillna(0)
+        
         del hourly['mult']
         del hourly['thisisit']
         del hourly['ut_ms']
