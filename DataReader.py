@@ -80,7 +80,7 @@ class PdData(RawData):
         
         hourly=pd.concat(h,axis=1).transpose()
         hourly.index = L[:len(pairs)]
-        hourly['UMBRA_season']=hourly['UMBRA_time'].ewm(240) > 10000
+        hourly['UMBRA_season']= hourly['UMBRA_time'].ewm(240).mean() > 10000
         hourly['UMBRA_time1']=hourly['UMBRA_time'].shift(1).fillna(method='bfill')
         hourly['UMBRA_time2']=hourly['UMBRA_time'].shift(2).fillna(method='bfill')
         hourly['UMBRA_time3']=hourly['UMBRA_time'].shift(3).fillna(method='bfill')
