@@ -87,10 +87,10 @@ class PdData(RawData):
         hourly['PENUMBRA_time1']=hourly['PENUMBRA_time'].shift(1).fillna(method='bfill')
         hourly['PENUMBRA_time2']=hourly['PENUMBRA_time'].shift(2).fillna(method='bfill')
         hourly['PENUMBRA_time3']=hourly['PENUMBRA_time'].shift(3).fillna(method='bfill')
-        hourly['conjuction'] = (pd.rolling_std(hourly['sa'],window=50, center=False) < 0.5) | (hourly['sunmarsearthangle_deg'].abs() < 3)
+        hourly['conjuction'] = (pd.rolling(hourly['sa'],window=50, center=False).std() < 0.5) | (hourly['sunmarsearthangle_deg'].abs() < 3)
         hourly['conjuction'] = hourly['conjuction'].fillna(method='bfill')
         
-        hourly['thisisit']=(((hourly['sunmarsearthangle_deg']-pd.rolling_min(hourly['sunmarsearthangle_deg'],window=300,center=True)).abs() < 1e-5) & (hourly['sunmarsearthangle_deg'] < hourly['sunmarsearthangle_deg'].shift(-1)-1e-6))
+        hourly['thisisit']=(((hourly['sunmarsearthangle_deg']-pd.rolling(hourly['sunmarsearthangle_deg'],window=300,center=True).min()).abs() < 1e-5) & (hourly['sunmarsearthangle_deg'] < hourly['sunmarsearthangle_deg'].shift(-1)-1e-6))
 
        
         hourly['mult'] = 1
