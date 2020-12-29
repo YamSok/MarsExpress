@@ -10,8 +10,8 @@ def main():
                     [r.massaged_data(x, hourly=True) for x in years]))
     # train = r.massaged_data(1, hourly=True)
     print("~"*25)
+    train_all = pd.concat(train.values(), axis=0).sort_index()
     print(train_all)
-    # train_all = pd.concat(train.values(), axis=0).sort_index()
     print("~"*25)
 
     print(train_all.shape)
