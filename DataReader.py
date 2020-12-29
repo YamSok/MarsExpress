@@ -105,7 +105,7 @@ class PdData(RawData):
         hourly.loc[hourly['thisisit'], 'mult']=-1
         
         hourly['sunmarsearthangle_deg2'] = hourly['mult'].cumprod() * hourly['sunmarsearthangle_deg']
-        print('>> After before del :', hourly.shape)
+        print('>> Before del :', hourly.shape)
 
         # del hourly['height_change']
 
@@ -116,10 +116,12 @@ class PdData(RawData):
         del hourly['mult']
         del hourly['thisisit']
         del hourly['ut_ms']
+        print('>> After del :', hourly.shape)
         return hourly
     
    
     def massaged_data(self, year, no_power_sub = False, hourly=False):
+        print(">>> Year", year)
         d = self.get_df_dict(year)
         master = copy.deepcopy(d['power'])
         print("> Importing ltdata")
@@ -135,6 +137,8 @@ class PdData(RawData):
 
         if hourly:
             master=self.make_hourly(master)
+        print('> Massaged data :', master.shape)
+        
         return master
 
     def add_lt_data(self, master, d, no_power_sub = False):
