@@ -5,7 +5,7 @@ import datetime as d
 
 def main():
     r = DataReader.PdData()
-    years = range(1,3)
+    years = range(1,4)
     train = dict(zip(years, 
                     [r.massaged_data(x, hourly=True) for x in years]))
     # train = r.massaged_data(1, hourly=True)
