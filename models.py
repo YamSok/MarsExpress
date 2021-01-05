@@ -65,15 +65,43 @@ def reglin(X_train, y_train):
     trained_model = LinearRegression().fit(X_train, y_train)
     save_model(trained_model, "reglin", False, "")
 
-def random_forest(X_train, y_train, n_estimators):
-    trained_model = RandomForestRegressor(n_estimators=n_estimators, random_state=0)
+def random_forest(X_train, y_train, n_estimators, params):
+    print("Training model : ")
+    print("> Number of variables :", p)
+    print("> Delay :", delay)
+    print("> n_estimators :", n_estimators)
+    print("> Model type : Random forest")
+    trained_model = RandomForestRegressor(n_estimators=n_estimators, random_state=0, min_samples_leaf=10, n_jobs=-1)
     trained_model.fit(X_train, y_train)
-    params = f"({n_estimators}estimators)_"
+
     save_model(trained_model, "random_forest", False, params)
 
 
+def extra_trees(X_train, y_train, n_estimators, params):
+    print("Training model : "), 
+    print("> Number of variables :", p)
+    print("> Delay :", delay)
+    print("> n_estimators :", n_estimators)
+    print("> Model type : Extra Trees")
+    trained_model = RandomForestRegressor(n_estimators=n_estimators, random_state=0, min_samples_leaf=20, n_jobs=-1)
+    trained_model.fit(X_train, y_train)
+    save_model(trained_model, "xtrees", False, params)
+
 if __name__ == "__main__":
-    X_train, X_test, y_train, y_test = generate_train_data("chrono")
-    reglin(X_train, y_train)
-    # ann(X_train, y_train, 16, 16, 10)
-    random_forest(X_train, y_train, 5)
+    ## Params
+    datareader = True
+    delay = True
+    n_estimators = 50
+
+    ## Data init
+    X_train, X_test, y_train, y_test = generate_train_data("chrono", datareader)
+    if delay:
+        X_train = add_delays(X_train, 4)
+    n,p = X_train.shape
+    delay_str = "delay_" if delay else ""
+    datareader_str = "datareader_" if datareader else ""
+    params = f"{n_estimators}estimators_{p}variables_{datareader_str}{delay_str}"
+
+    ## Model
+    extra_trees(X_train, y_train, n_estimators, params)
+
