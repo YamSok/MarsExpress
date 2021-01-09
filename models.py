@@ -4,12 +4,14 @@ from preprocessing import *
 
 ## Modeling
 from sklearn.linear_model import LinearRegression
-from sklearn.ensemble import RandomForestRegressor
+from sklearn.ensemble import RandomForestRegressor, ExtraTreesRegressor
+
 from tensorflow import keras
 from tensorflow.keras import models, layers, initializers
 
 ## Saving
 from joblib import dump, load
+import pickle
 
 
 def save_model(trained_model, model_type, keras, params = ''):
@@ -66,10 +68,6 @@ def reglin(X_train, y_train):
     save_model(trained_model, "reglin", False, "")
 
 def random_forest(X_train, y_train, n_estimators, params):
-    print("Training model : ")
-    print("> Number of variables :", p)
-    print("> Delay :", delay)
-    print("> n_estimators :", n_estimators)
     print("> Model type : Random forest")
     trained_model = RandomForestRegressor(n_estimators=n_estimators, random_state=0, min_samples_leaf=10, n_jobs=-1)
     trained_model.fit(X_train, y_train)
@@ -78,30 +76,51 @@ def random_forest(X_train, y_train, n_estimators, params):
 
 
 def extra_trees(X_train, y_train, n_estimators, params):
-    print("Training model : "), 
-    print("> Number of variables :", p)
-    print("> Delay :", delay)
-    print("> n_estimators :", n_estimators)
     print("> Model type : Extra Trees")
-    trained_model = RandomForestRegressor(n_estimators=n_estimators, random_state=0, min_samples_leaf=20, n_jobs=-1)
+    trained_model = ExtraTreesRegressor(n_estimators=n_estimators, random_state=0, min_samples_leaf=20, n_jobs=-1)
     trained_model.fit(X_train, y_train)
     save_model(trained_model, "xtrees", False, params)
+    return trained_model
+
+def get_importance_features(X_train, y_train, n_estimators, params):
+    model = extra_trees(X_train, y_train, n_estimators, params)
+    imp = model.feature_importances_
+    indices = np.argsort(imp)[::-1]
+    importance = X_train.columns[indices]
+    dump(importance, "importance")
+    print(importance[:15])
 
 if __name__ == "__main__":
     ## Params
     datareader = True
     delay = True
-    n_estimators = 50
+    importance = True
+    nb_features = 40
+    n_estimators = 5
+    
 
     ## Data init
     X_train, X_test, y_train, y_test = generate_train_data("chrono", datareader)
     if delay:
         X_train = add_delays(X_train, 4)
+    if importance:
+        importance_tab = load("importance")
+        X_train = X_train[importance_tab[:nb_features]]
     n,p = X_train.shape
+
+    ## Output
     delay_str = "delay_" if delay else ""
     datareader_str = "datareader_" if datareader else ""
-    params = f"{n_estimators}estimators_{p}variables_{datareader_str}{delay_str}"
+    importance_str = f"{nb_features}best_features_" if importance else ""
+    params = f"{n_estimators}estimators_{p}variables_{datareader_str}{importance_str}{delay_str}"
+
+    print("Training model : "), 
+    print("> Number of variables :", p)
+    print("> Delay :", delay)
+    print("> Importance :", importance)
+    if importance:
+        print("> Nb features :", nb_features)
+    print("> n_estimators :", n_estimators)
 
     ## Model
     extra_trees(X_train, y_train, n_estimators, params)
-
