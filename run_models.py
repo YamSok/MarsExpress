@@ -89,7 +89,7 @@ def xgboosting(X_train, y_train, n_estimators, params):
                                     colsample_bytree=0.5,
                                     learning_rate=0.1,
                                     n_estimators=n_estimators,
-                                    verbosity=2,
+                                    verbosity=0,
                                     seed=42)
     power_lines = y_train.columns
     trained_models = {}
@@ -107,17 +107,8 @@ def get_importance_features(X_train, y_train, n_estimators, params):
     dump(importance, "importance")
     print(importance[:15])
 
-
-if __name__ == "__main__":
-    ## Params
-    datareader = True
-    delay = True
-    importance = False
-    nb_features = 40
-    n_estimators = 5
-    
-
-    ## Data init
+def run_test(datareader, delay, importance, nb_features, n_estimators):
+## Data init
     X_train, X_test, y_train, y_test = generate_train_data("chrono", datareader)
     if delay:
         X_train = add_delays(X_train, 4)
@@ -142,5 +133,20 @@ if __name__ == "__main__":
 
     ## Model
     # get_importance_features(X_train, y_train, 500, params)
-    xgboosting(X_train, y_train, n_estimators, params)
-    random_forest(X_train, y_train, n_estimators, params)
+    for n in [50,100,200,500]:
+        extra_trees(X_train, y_train, n, params):
+        xgboosting(X_train, y_train, n, params)
+        random_forest(X_train, y_train, n, params)
+
+if __name__ == "__main__":
+    ## Test 1 
+    datareader = True
+    delay = True
+    importance = False
+    nb_features = 40
+    n_estimators = 5
+    run_test(datareader, delay, importance, nb_features, n_estimators)
+
+    ## Test 2
+    importance = True
+    run_test(datareader, delay, importance, nb_features, n_estimators)
