@@ -94,7 +94,7 @@ if __name__ == "__main__":
     ## Params
     datareader = True
     delay = True
-    importance = True
+    importance = False
     nb_features = 40
     n_estimators = 5
     
@@ -123,4 +123,5 @@ if __name__ == "__main__":
     print("> n_estimators :", n_estimators)
 
     ## Model
-    extra_trees(X_train, y_train, n_estimators, params)
+    get_importance_features(X_train, y_train, 500, params)
+    # extra_trees(X_train, y_train, n_estimators, params)
