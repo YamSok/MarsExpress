@@ -107,7 +107,7 @@ def get_importance_features(X_train, y_train, n_estimators, params):
     dump(importance, "importance")
     print(importance[:15])
 
-def run_test(datareader, delay, importance, nb_features, n_estimators):
+def run_test(datareader, delay, importance, nb_features):
 ## Data init
     X_train, X_test, y_train, y_test = generate_train_data("chrono", datareader)
     if delay:
@@ -116,24 +116,25 @@ def run_test(datareader, delay, importance, nb_features, n_estimators):
         importance_tab = load("importance")
         X_train = X_train[importance_tab[:nb_features]]
     n,p = X_train.shape
+    
+    for n_estimators in [50,100,200,500]:
 
-    ## Output
-    delay_str = "delay_" if delay else ""
-    datareader_str = "datareader_" if datareader else ""
-    importance_str = f"{nb_features}best_features_" if importance else ""
-    params = f"{n_estimators}estimators_{p}variables_{datareader_str}{importance_str}{delay_str}"
+        ## Output
+        delay_str = "delay_" if delay else ""
+        datareader_str = "datareader_" if datareader else ""
+        importance_str = f"{nb_features}best_features_" if importance else ""
+        params = f"{n_estimators}estimators_{p}variables_{datareader_str}{importance_str}{delay_str}"
 
-    print("Training model : "), 
-    print("> Number of variables :", p)
-    print("> Delay :", delay)
-    print("> Importance :", importance)
-    if importance:
-        print("> Nb features :", nb_features)
-    print("> n_estimators :", n_estimators)
+        print("Training model : "), 
+        print("> Number of variables :", p)
+        print("> Delay :", delay)
+        print("> Importance :", importance)
+        if importance:
+            print("> Nb features :", nb_features)
+        print("> n_estimators :", n_estimators)
 
-    ## Model
-    # get_importance_features(X_train, y_train, 500, params)
-    for n in [50,100,200,500]:
+        ## Model
+        # get_importance_features(X_train, y_train, 500, params)
         extra_trees(X_train, y_train, n, params)
         xgboosting(X_train, y_train, n, params)
         random_forest(X_train, y_train, n, params)
@@ -144,9 +145,8 @@ if __name__ == "__main__":
     delay = True
     importance = False
     nb_features = 40
-    n_estimators = 5
-    run_test(datareader, delay, importance, nb_features, n_estimators)
+    run_test(datareader, delay, importance, nb_features)
 
     ## Test 2
     importance = True
-    run_test(datareader, delay, importance, nb_features, n_estimators)
+    run_test(datareader, delay, importance, nb_features)
