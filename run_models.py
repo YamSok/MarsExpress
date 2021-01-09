@@ -70,13 +70,13 @@ def reglin(X_train, y_train):
 
 def random_forest(X_train, y_train, n_estimators, params):
     print("> Model type : Random forest")
-    trained_model = RandomForestRegressor(n_estimators=n_estimators, random_state=0, min_samples_leaf=10, n_jobs=-1)
+    trained_model = RandomForestRegressor(n_estimators=n_estimators, random_state=0, min_samples_leaf=10, n_jobs=-1, verbose=1)
     trained_model.fit(X_train, y_train)
     save_model(trained_model, "random_forest", False, params)
 
 def extra_trees(X_train, y_train, n_estimators, params):
     print("> Model type : Extra Trees")
-    trained_model = ExtraTreesRegressor(n_estimators=n_estimators, random_state=0, min_samples_leaf=20, n_jobs=-1)
+    trained_model = ExtraTreesRegressor(n_estimators=n_estimators, random_state=0, min_samples_leaf=20, n_jobs=-1, verbose=1)
     trained_model.fit(X_train, y_train)
     save_model(trained_model, "xtrees", False, params)
     return trained_model
@@ -135,9 +135,9 @@ def run_test(datareader, delay, importance, nb_features):
 
         ## Model
         # get_importance_features(X_train, y_train, 500, params)
-        extra_trees(X_train, y_train, n, params)
-        xgboosting(X_train, y_train, n, params)
-        random_forest(X_train, y_train, n, params)
+        extra_trees(X_train, y_train, n_estimators, params)
+        xgboosting(X_train, y_train, n_estimators, params)
+        random_forest(X_train, y_train, n_estimators, params)
 
 if __name__ == "__main__":
     ## Test 1 
