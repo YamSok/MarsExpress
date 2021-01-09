@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import glob
+import os
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import train_test_split
 from tensorflow import keras
@@ -12,11 +13,46 @@ def import_file(file_name, file_type):
     data = pd.read_csv(file_name, sep=",", index_col=0) # index -> ut_ms
     data.index = pd.to_datetime(data.index, unit='ms') # ut_ms -> datetime
 
+    # if file_type == "dmop":
+    #     data['commande'] = data.apply(lambda x : x['subsystem'][:4], axis=1)
+    #     #data['len'] = data.apply(lambda x : len(x['subsystem'].split(".")), axis=1)
+    #     data = pd.get_dummies(data[["commande"]]) #One Hot Encoding (naïf)
+    #     data = data.resample('60min').pad()
     if file_type == "dmop":
-        data['commande'] = data.apply(lambda x : x['subsystem'][:4], axis=1)
-        #data['len'] = data.apply(lambda x : len(x['subsystem'].split(".")), axis=1)
-        data = pd.get_dummies(data[["commande"]]) #One Hot Encoding (naïf)
+        pairs = [['AAAAF40B0','AAAAF40C0'],
+        ['AAAAF40E0','AAAAF40F0'],
+        ['AAAAF40D0','AAAAF40P0'],
+        ['ASSSF01P0', 'ASSSF06P0'],
+        ['AACFM01A','AACFM02A'],
+        ['AACF325C','AACF325D'],
+        ['AMMMF52D3','AMMMF52D4'],
+        ['AMMMF18A0','AMMMF40A0'],
+        ['AHHHF01P1','AHHHF50A2'],
+        ['ATTTF030A', 'ATTTF030B'],
+        ['ATTTF321P','ATTTF321R'],
+        ['AACFM01A','AACFM02A'],
+        ['AMMMF18A0','AMMMF19A0'],
+        ['PENS','PENE'],
+        ['MOCS','MOCE'],
+        ['PDNS','PDNE'],
+        ['PPNS','PPNE'],
+        ['UPBS','UPBE']]
+        dummies = pd.get_dummies(data['subsystem'].apply(lambda x: x[:4])).ewm(span = 100).mean()
+        
+        tmp=[data[data['subsystem'].apply(lambda x: y[0] in x.split(".")[0] or y[1] in x.split(".")[0] )]['subsystem'].apply(lambda x: 1 if y[0] in x else -1) for y in pairs]
+        x=pd.concat(tmp, axis=1).fillna(method='ffill').fillna(0)
+        x.columns=['pair%d'%z for z in range(len(x.columns))]
+        p = []
+        for idx,i in enumerate(pairs):
+            p.append(data['subsystem'].apply(lambda x: 1 if i[1] in x.split(".")[0] else (0 if i[0] in x.split(".")[0] else np.nan)))
+
+        y = pd.concat(p, axis=1).fillna(method='ffill').fillna(0)
+        y.columns=['pair_c_%d'%z for z in range(len(x.columns))]
+
+        data = pd.concat([dummies, x,y], axis=1).fillna(method='ffill').fillna(0)
+
         data = data.resample('60min').pad()
+
 
     elif file_type == "ftl":
         data = pd.get_dummies(data[["type", "flagcomms"]]) #One Hot Encoding (naïf)
@@ -108,7 +144,7 @@ def generate_data(train_folder, test_folder, verbose):
     Generate 3 years DataFrames for training and testing set
     """
     
-    file_types = [ "evtf", "saaf", "dmop", "ltdata", "ftl"]
+    file_types = ["dmop", "evtf", "saaf", "ltdata", "ftl"]
     
     print("@@@@@@"*4) if verbose else 0
     print("Creating train dataset") if verbose else 0
@@ -143,24 +179,29 @@ def generate_data(train_folder, test_folder, verbose):
     test.to_pickle(f"data/test_{timestamp}.p")
     return train, test
 
-def import_data():
-    train_list = glob.glob(f"data/train*") 
-    train_path = np.sort(train_list)[-1]
-    test_list = glob.glob(f"data/test*") 
-    test_path = np.sort(test_list)[-1]
+def import_data(datareader = True):
+    """
+    Import most recent pickle dump for train and test dataset
+    """
+    # train_path = max(glob.glob("data/train*"),key=os.path.getctime)
+    if datareader :
+        train_path = "data/train_29-12-2020(13:51:27).p"
+    else :
+        train_path = "data/train_25-12-2020(10:43:53).p"
+    # test_path =  max(glob.glob("data/test*"),key=os.path.getctime)
+    print("> Importing ", train_path)
     train = pd.read_pickle(train_path)
-    test = pd.read_pickle(test_path)
-    return train, test
+    # print("> Importing ", test_path)
+    # test = pd.read_pickle(test_path)
+    return train
     
-def generate_train_data(method):
-    train, test = import_data()
+def generate_train_data(method, datareader):
+    train = import_data(datareader)
 
     power_ids = train.columns[train.columns.str.match("NPWD")]
     X = train.copy()
     X.drop(list(power_ids), inplace = True, axis = 1) # drop power
-    print(np.shape(X))
     y = train.copy()[list(power_ids)]
-    print(np.shape(y))
     if method == "chrono":
         train_start_date = "2008"
         train_end_date = "2012-05-27"
@@ -176,6 +217,15 @@ def generate_train_data(method):
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2,random_state=42)
 
     return X_train, X_test, y_train, y_test
+
+
+def add_delays(df, window):
+    lags = df.ewm(window).mean()
+    diffs = df-lags
+    lags.columns = [x+'.ewma' for x in df.columns]
+    diffs.columns = [x+'.diff' for x in df.columns]
+    return pd.concat([df,lags,diffs], axis=1)
+
 
 if __name__ == "__main__":
     TRAIN_FOLDER = "../data_MEX/train_set/"
