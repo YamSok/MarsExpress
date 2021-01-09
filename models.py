@@ -77,7 +77,7 @@ def random_forest(X_train, y_train, n_estimators, params):
 
 def extra_trees(X_train, y_train, n_estimators, params):
     print("> Model type : Extra Trees")
-    trained_model = ExtraTreesRegressor(n_estimators=n_estimators, random_state=0, min_samples_leaf=20, n_jobs=-1)
+    trained_model = ExtraTreesRegressor(n_estimators=n_estimators, random_state=0, min_samples_leaf=20, n_jobs=-1, verbose = 1)
     trained_model.fit(X_train, y_train)
     save_model(trained_model, "xtrees", False, params)
     return trained_model
@@ -96,7 +96,7 @@ if __name__ == "__main__":
     delay = True
     importance = False
     nb_features = 40
-    n_estimators = 5
+    n_estimators = 500
     
 
     ## Data init
@@ -123,5 +123,5 @@ if __name__ == "__main__":
     print("> n_estimators :", n_estimators)
 
     ## Model
-    get_importance_features(X_train, y_train, 500, params)
+    get_importance_features(X_train, y_train, n_estimators, params)
     # extra_trees(X_train, y_train, n_estimators, params)
