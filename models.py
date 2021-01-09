@@ -5,6 +5,7 @@ from preprocessing import *
 ## Modeling
 from sklearn.linear_model import LinearRegression
 from sklearn.ensemble import RandomForestRegressor, ExtraTreesRegressor
+import xgboost as xgb
 
 from tensorflow import keras
 from tensorflow.keras import models, layers, initializers
@@ -71,9 +72,7 @@ def random_forest(X_train, y_train, n_estimators, params):
     print("> Model type : Random forest")
     trained_model = RandomForestRegressor(n_estimators=n_estimators, random_state=0, min_samples_leaf=10, n_jobs=-1)
     trained_model.fit(X_train, y_train)
-
     save_model(trained_model, "random_forest", False, params)
-
 
 def extra_trees(X_train, y_train, n_estimators, params):
     print("> Model type : Extra Trees")
@@ -82,6 +81,24 @@ def extra_trees(X_train, y_train, n_estimators, params):
     save_model(trained_model, "xtrees", False, params)
     return trained_model
 
+def xgboosting(X_train, y_train, n_estimators, params):
+    print("> Model type : XGBoost")
+    model = xgb.XGBModel(objective='reg:squarederror',
+                                    max_depth=11,
+                                    subsample=0.5,
+                                    colsample_bytree=0.5,
+                                    learning_rate=0.1,
+                                    n_estimators=n_estimators,
+                                    verbosity=2,
+                                    seed=42)
+    power_lines = y_train.columns
+    trained_models = {}
+    for pl in power_lines:
+        print(">> Fitting", pl)
+        trained_model = model.fit(X_train, y_train[pl])
+        trained_models[pl] = trained_model
+    save_model(trained_models, "xgboost", False, params)
+
 def get_importance_features(X_train, y_train, n_estimators, params):
     model = extra_trees(X_train, y_train, n_estimators, params)
     imp = model.feature_importances_
@@ -89,6 +106,7 @@ def get_importance_features(X_train, y_train, n_estimators, params):
     importance = X_train.columns[indices]
     dump(importance, "importance")
     print(importance[:15])
+
 
 if __name__ == "__main__":
     ## Params
@@ -123,5 +141,6 @@ if __name__ == "__main__":
     print("> n_estimators :", n_estimators)
 
     ## Model
-    get_importance_features(X_train, y_train, 500, params)
-    # extra_trees(X_train, y_train, n_estimators, params)
+    # get_importance_features(X_train, y_train, 500, params)
+    xgboosting(X_train, y_train, n_estimators, params)
+    random_forest(X_train, y_train, n_estimators, params)
