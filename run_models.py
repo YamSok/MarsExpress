@@ -137,7 +137,7 @@ def run_test(datareader, delay, importance, nb_features):
         ## Model
         # get_importance_features(X_train, y_train, 500, params)
         extra_trees(X_train, y_train, n_estimators, params)
-        xgboosting(X_train, y_train, n_estimators, params)
+        # xgboosting(X_train, y_train, n_estimators, params)
         random_forest(X_train, y_train, n_estimators, params)
 
 if __name__ == "__main__":
