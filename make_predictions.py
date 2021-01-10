@@ -54,7 +54,8 @@ def main(file_name):
     datareader = "datareader" in file_name
     delay = "delay" in file_name
     importance = "best" in file_name
-    nb_features = int(file_name.split('_')[2].split("v")[0])
+    if importance:
+        nb_features = int(file_name.split('_')[2].split("v")[0])
     params = "_".join(file_name.split("_")[:-1]).split("/")[1]
 
     print("> Making prediction")
