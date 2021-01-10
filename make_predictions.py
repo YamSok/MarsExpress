@@ -14,7 +14,6 @@ warnings.filterwarnings('ignore')
 import argparse
 
 
-
 def get_model_file_name(model_type):
     query = f"models/*{model_type}*"
     query_list = glob.glob(f"models/*{model_type}*")
@@ -30,45 +29,65 @@ def get_model_file_name(model_type):
     
     return file_name
 
-def generate_predictions(file_name, X_test,model_type):
-    print("Loading", file_name)
-    query = f"models/*{model_type}*"
-    if len(glob.glob(query + "/**")) != 0: ## means : Has subfolder == True
-        model = models.load_model(file_name)
-        print("Keras")
-    else:
-        model = load(file_name)
+def generate_predictions(file_name, X_test, powerlines):
+    print("> Loading", file_name)
+    
+    model = load(file_name)
+    if "xgboost" in file_name:
+        # 33 models
+        predictions = {}
+        for pl in powerlines:
+            model_i = model[pl]
+            prediction = model_i.predict(X_test)
+            predictions[pl] = prediction
+        predict = pd.DataFrame.from_dict(predictions)
+    else: 
+        predict = model.predict(X_test)
     print("> Loaded")
-    predict = model.predict(X_test)
+
     return predict
 
-def main(model_type):
+def main(file_name):
 
-    file_name = get_model_file_name(model_type = "")
+    # file_name = get_model_file_name(model_type = model_type)
+    # Parsing
     datareader = "datareader" in file_name
     delay = "delay" in file_name
-    
+    importance = "best" in file_name
+    nb_features = int(file_name.split('_')[2].split("v")[0])
+    params = "_".join(file_name.split("_")[:-1]).split("/")[1]
+
+    print("> Making prediction")
+    print("> Model :", params)
+
+    #Data preparation
     X_train, X_test, y_train, y_test = generate_train_data("chrono", datareader)
     if delay:
         X_test = add_delays(X_test, 4)
-
-    pred = generate_predictions(file_name, X_test, model_type="")
+    if importance:
+        importance_tab = load("importance")
+        X_test = X_test[importance_tab[:nb_features]]
+    
+    # Prediction
     power_ids = y_train.columns[y_train.columns.str.match("NPWD")]
-
+    pred = generate_predictions(file_name, X_test, power_ids)
     predict = pd.DataFrame(pred, columns = power_ids )
     y_test = y_test.copy()
     predict.index = y_test.index
 
-    timestamp = d.datetime.now().strftime("%d-%m-%Y(%H:%M:%S)")
-    params = "_".join(file_name.split("_")[:-1]).split("/")[1]
-    predict_file_name = f"results/predictions_{params}_{timestamp}.p"
+    # Output
+    # timestamp = d.datetime.now().strftime("%d-%m-%Y(%H:%M:%S)")
+    predict_file_name = f"results/predictions_{params}.p"
     predict.to_pickle(predict_file_name)
-    print("Saved predictions :", predict_file_name)
+    print("> Predictions DataFrame saved :", predict_file_name)
 
-parser = argparse.ArgumentParser()
+# parser = argparse.ArgumentParser()
 
-parser.add_argument("-m", help="Type of model (ex: random_forest, xtrees ...)", required=False)
+# parser.add_argument("-m", default="", help="Type of model (ex: random_forest, xtrees ...)", required=False)
 
-args = parser.parse_args()
+# args = parser.parse_args()
 
-main(args.m)
+file_names = glob.glob("models/*")
+for file_name in file_names:
+    main(file_name)
+    print("~~~"*15)
