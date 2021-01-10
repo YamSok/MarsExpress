@@ -51,6 +51,7 @@ def main(file_name):
 
     # file_name = get_model_file_name(model_type = model_type)
     # Parsing
+    print(file_name)
     datareader = "datareader" in file_name
     delay = "delay" in file_name
     importance = "best" in file_name
