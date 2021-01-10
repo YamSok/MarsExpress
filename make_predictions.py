@@ -56,7 +56,9 @@ def main(file_name):
     delay = "delay" in file_name
     importance = "best" in file_name
     if importance:
-        nb_features = int(file_name.split('_')[2].split("v")[0])
+        # nb_features = int(file_name.split('_')[2].split("v")[0])
+        nb_features = int(file_name.split('variables')[0].split('_')[-1])
+        print(nb_features)
     params = "_".join(file_name.split("_")[:-1]).split("/")[1]
 
     print("> Making prediction")
@@ -83,7 +85,7 @@ def main(file_name):
     predict.to_pickle(predict_file_name)
     print("> Predictions DataFrame saved :", predict_file_name)
 
-# parser = argparse.ArgumentParser()
+parser = argparse.ArgumentParser()
 
 # parser.add_argument("-m", default="", help="Type of model (ex: random_forest, xtrees ...)", required=False)
 
