@@ -99,6 +99,7 @@ def xgboosting(X_train, y_train, n_estimators, params):
         trained_models[pl] = trained_model
     save_model(trained_models, "xgboost", False, params)
 
+
 def get_importance_features(X_train, y_train, n_estimators, params):
     model = extra_trees(X_train, y_train, n_estimators, params)
     imp = model.feature_importances_
@@ -140,13 +141,9 @@ def run_test(datareader, delay, importance, nb_features):
         random_forest(X_train, y_train, n_estimators, params)
 
 if __name__ == "__main__":
-    ## Test 1 
+    ## Test à faire : sans délai
     datareader = True
-    delay = True
+    delay = False
     importance = False
     nb_features = 40
-    run_test(datareader, delay, importance, nb_features)
-
-    ## Test 2
-    importance = True
     run_test(datareader, delay, importance, nb_features)
