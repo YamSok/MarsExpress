@@ -88,9 +88,9 @@ def main(file_name):
     X_train, X_test, y_train, y_test = generate_train_data("chrono", datareader)
     if delay:
         X_test = add_delays(X_test, 4)
-    if importance:
-        importance_tab = load("importance")
-        X_test = X_test[importance_tab[:nb_features]]
+    # if importance:
+    #     importance_tab = load("importance")
+    #     X_test = X_test[importance_tab[:nb_features]]
     
     # Prediction
     power_ids = y_train.columns[y_train.columns.str.match("NPWD")]
