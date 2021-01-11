@@ -74,7 +74,7 @@ power_lines = y_train.columns
 
 try:
     # Check if pickle is already there
-    importances = pickle.load( open( "immportances.pickle", "rb" ) ) 
+    importances = pickle.load( open( "importances.pickle", "rb" ) ) 
 except IOError:
     # Get Extra Trees models, one per power line, just to see feature importances
     models=get_all_models(['xtrees'], power_lines, [X_train[features]], train_all)
