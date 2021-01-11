@@ -29,7 +29,7 @@ def get_model_file_name(model_type):
     
     return file_name
 
-def generate_predictions(file_name, X_test, powerlines):
+def generate_predictions_old(file_name, X_test, powerlines):
     print("> Loading", file_name)
     
     model = load(file_name)
@@ -39,6 +39,26 @@ def generate_predictions(file_name, X_test, powerlines):
         for pl in powerlines:
             model_i = model[pl]
             prediction = model_i.predict(X_test)
+            predictions[pl] = prediction
+        predict = pd.DataFrame.from_dict(predictions)
+    else: 
+        predict = model.predict(X_test)
+    print("> Loaded")
+
+    return predict
+
+def generate_predictions(file_name, X_test, powerlines):
+    print("> Loading", file_name)
+    importance_tab = load("importance_per_w")
+    
+    model = load(file_name)
+    if "xgboost" in file_name:
+        # 33 models
+        predictions = {}
+        for pl in powerlines:
+            features = importance_tab[pl]
+            model_i = model[pl]
+            prediction = model_i.predict(X_test[features[:40]])
             predictions[pl] = prediction
         predict = pd.DataFrame.from_dict(predictions)
     else: 
@@ -87,7 +107,7 @@ def main(file_name):
 
 parser = argparse.ArgumentParser()
 
-# parser.add_argument("-m", default="", help="Type of model (ex: random_forest, xtrees ...)", required=False)
+# parser.add_argument("-m",sl default="", help="Type of model (ex: random_forest, xtrees ...)", required=False)
 
 # args = parser.parse_args()
 
