@@ -25,17 +25,17 @@ def get_estimator(estimator):
                                  subsample=0.5,
                                  colsample_bytree=0.5,
                                  learning_rate=0.1,
-                                 n_estimators=100,
+                                 n_estimators=500,
                                  silent=1,
                                  seed=42)
                 
     elif estimator == 'xtrees':
-        e = ExtraTreesRegressor(n_estimators=100,
+        e = ExtraTreesRegressor(n_estimators=500,
                                       random_state=0,
                                       min_samples_leaf=20,
                                       n_jobs=-1)
     elif estimator == 'rf':
-        e=RandomForestRegressor(n_estimators=100,
+        e=RandomForestRegressor(n_estimators=500,
                                         random_state=1,
                                         min_samples_leaf=10,
                                         n_jobs=-1)
@@ -110,4 +110,4 @@ datareader_str = "datareader_"
 importance_str = f"{40}best_features_" 
 params = f"{n_estimators}estimators_{40}variables_{datareader_str}{importance_str}{delay_str}_test"
 
-submission.to_pickle(f"results/predictions_{params}.p")
+submission.to_pickle(f"results/predictions_xgboost_{params}.p")
