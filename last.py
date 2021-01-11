@@ -89,7 +89,7 @@ except IOError:
             imp_per_w[i].append(list(X_train.columns)[indices[f]])
             
     # Sorted Feature importances are dumped to a pickle file
-    dump(imp_per_w, "importances.pickle", "wb")
+    dump(imp_per_w, "importances.pickle")
     importances = imp_per_w
 
 models=get_all_models(['xtrees','booster'], power_lines, [X_train], train_all, importances, 40)
