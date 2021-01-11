@@ -91,7 +91,7 @@ parser = argparse.ArgumentParser()
 
 # args = parser.parse_args()
 
-file_names = glob.glob("models/*")
+file_names = glob.glob("models/*xgboost*11-01*")
 for file_name in file_names:
     main(file_name)
     print("~~~"*15)
