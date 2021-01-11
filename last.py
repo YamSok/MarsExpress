@@ -110,4 +110,4 @@ datareader_str = "datareader_"
 importance_str = f"{40}best_features_" 
 params = f"{n_estimators}estimators_{40}variables_{datareader_str}{importance_str}{delay_str}_test"
 
-submission.to_pickle(f"results/predictions_{param}.p")
+submission.to_pickle(f"results/predictions_{params}.p")
