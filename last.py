@@ -92,7 +92,7 @@ except IOError:
     dump(imp_per_w, "importances.pickle")
     importances = imp_per_w
 
-models=get_all_models(['xtrees','booster'], power_lines, [X_train], train_all, importances, 40)
+models=get_all_models(['booster'], power_lines, [X_train], train_all, importances, 40)
 predictions  = {}
 submission = y_test.copy()
 submission.index = y_test.index
