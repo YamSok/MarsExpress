@@ -115,8 +115,8 @@ def best_xgb(X_train, y_train, n_estimators, params):
     for pl in power_lines:
         print(">> Fitting", pl)
         features = importance_tab[pl]
-        trained_model = model.fit(X_train[features[:40]], y_train[pl])
-        trained_models[pl] = trained_model
+        model.fit(X_train[features[:40]], y_train[pl])
+        trained_models[pl] = model
     save_model(trained_models, "xgboost", False, params)
 
 
