@@ -100,7 +100,7 @@ for w in power_lines:
     predictions[w] = X_test[['ut']]
     for idx, est in enumerate(models[w]):
         m = "model_%d"%idx
-        predictions[w][m]=est.predict(X_test[importances[w]].astype(float))
+        predictions[w][m]=est.predict(X_test[importances].astype(float))
     submission[w] = predictions[w][[x for x in predictions[w].columns if 'model' in x]].mean(axis=1)
 
 n_estimators = 500

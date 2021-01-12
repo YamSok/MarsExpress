@@ -37,6 +37,8 @@ def generate_predictions_old(file_name, X_test, powerlines):
         # 33 models
         predictions = {}
         for pl in powerlines:
+            print('~~'*15)
+            print(pl)
             model_i = model[pl]
             prediction = model_i.predict(X_test)
             predictions[pl] = prediction
@@ -56,6 +58,8 @@ def generate_predictions(file_name, X_test, powerlines):
         # 33 models
         predictions = {}
         for pl in powerlines:
+            print('~~'*15)
+            print(pl)
             features = importance_tab[pl]
             model_i = model[pl]
             prediction = model_i.predict(X_test[features[:40]])
@@ -73,12 +77,12 @@ def main(file_name):
     # Parsing
     print(file_name)
     datareader = "datareader" in file_name
-    delay = "delay" in file_name
-    importance = "best" in file_name
-    if importance:
+    # delay = "delay" in file_name
+    # importance = "best" in file_name
+    # if importance:
         # nb_features = int(file_name.split('_')[2].split("v")[0])
-        nb_features = int(file_name.split('variables')[0].split('_')[-1])
-        print(nb_features)
+        # nb_features = int(file_name.split('variables')[0].split('_')[-1])
+        # print(nb_features)
     params = "_".join(file_name.split("_")[:-1]).split("/")[1]
 
     print("> Making prediction")
@@ -86,7 +90,7 @@ def main(file_name):
 
     #Data preparation
     X_train, X_test, y_train, y_test = generate_train_data("chrono", datareader)
-    if delay:
+    if datareader:
         X_test = add_delays(X_test, 4)
     # if importance:
     #     importance_tab = load("importance")
@@ -101,7 +105,7 @@ def main(file_name):
 
     # Output
     # timestamp = d.datetime.now().strftime("%d-%m-%Y(%H:%M:%S)")
-    predict_file_name = f"results/predictions_{params}.p"
+    predict_file_name = f"final_results/predictions_{params}.p"
     predict.to_pickle(predict_file_name)
     print("> Predictions DataFrame saved :", predict_file_name)
 
@@ -111,7 +115,7 @@ parser = argparse.ArgumentParser()
 
 # args = parser.parse_args()
 
-file_names = glob.glob("models/*xgboost*11-01*")
+file_names = glob.glob("models/*12-01*")
 for file_name in file_names:
     main(file_name)
     print("~~~"*15)

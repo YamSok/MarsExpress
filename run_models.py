@@ -110,8 +110,8 @@ def best_xgb(X_train, y_train, n_estimators, params):
                                     n_estimators=n_estimators,
                                     verbosity=0,
                                     seed=42)
-    trained_models = {}
     
+    trained_models = {}
     for pl in power_lines:
         print(">> Fitting", pl)
         features = importance_tab[pl]
@@ -120,13 +120,13 @@ def best_xgb(X_train, y_train, n_estimators, params):
     save_model(trained_models, "xgboost", False, params)
 
 
-def get_importance_features(X_train, y_train, n_estimators, params):
-    model = extra_trees(X_train, y_train, n_estimators, params)
-    imp = model.feature_importances_
-    indices = np.argsort(imp)[::-1]
-    importance = X_train.columns[indices]
-    dump(importance, "importance")
-    print(importance[:15])
+# def get_importance_features(X_train, y_train, n_estimators, params):
+#     model = extra_trees(X_train, y_train, n_estimators, params)
+#     imp = model.feature_importances_
+#     indices = np.argsort(imp)[::-1]
+#     importance = X_train.columns[indices]
+#     dump(importance, "importance")
+#     print(importance[:15])
 
 def get_xtrees_models(X_train, y_train, n_estimators):
     models = {}
@@ -155,37 +155,40 @@ def get_importance(X_train, y_train, n_estimators):
     print(len(imp_per_pl))
     dump(imp_per_pl, "importance_per_w")
 
-def run_test(datareader, delay, importance, nb_features):
+def run_test():
 ## Data init
-    X_train, X_test, y_train, y_test = generate_train_data("chrono", datareader)
-    if delay:
-        X_train = add_delays(X_train, 4)
-    if importance:
-        importance_tab = load("importance")
-        X_train = X_train[importance_tab[:nb_features]]
-    n,p = X_train.shape
     
-    for n_estimators in [50,100,200,500]:
+    
+    for datareader in [True, False]:
 
+        X_train, X_test, y_train, y_test = generate_train_data("chrono", datareader)
+            if datareader:
+                X_train = add_delays(X_train, 4)
+            # if importance:
+            #     importance_tab = load("importance")
+            #     X_train = X_train[importance_tab[:nb_features]]
+            n,p = X_train.shape
         ## Output
-        delay_str = "delay_" if delay else ""
+        delay_str = "delay_" if datareader else ""
         datareader_str = "datareader_" if datareader else ""
-        importance_str = f"{nb_features}best_features_" if importance else ""
-        params = f"{n_estimators}estimators_{p}variables_{datareader_str}{importance_str}{delay_str}"
+        # importance_str = f"{nb_features}best_features_" if importance else ""
+        # params = f"{n_estimators}estimators_{p}variables_{datareader_str}{importance_str}{delay_str}"
+        params = f"{datareader_str}"
+
 
         print("Training model : "), 
-        print("> Number of variables :", p)
-        print("> Delay :", delay)
-        print("> Importance :", importance)
-        if importance:
-            print("> Nb features :", nb_features)
-        print("> n_estimators :", n_estimators)
+        # print("> Number of variables :", p)
+        # print("> Delay :", delay)
+        # print("> Importance :", importance)
+        # if importance:
+        #     print("> Nb features :", nb_features)
+        # print("> n_estimators :", n_estimators)
 
         ## Model
         # get_importance_features(X_train, y_train, 500, params)
-        # extra_trees(X_train, y_train, n_estimators, params)
-        xgboosting(X_train, y_train, n_estimators, params)
-        # random_forest(X_train, y_train, n_estimators, params)
+        extra_trees(X_train, y_train, n_estimators, params)
+        # xgboosting(X_train, y_train, n_estimators, params)
+        random_forest(X_train, y_train, n_estimators, params)
 
 def xgb_test():
     datareader = True
@@ -217,10 +220,7 @@ def xgb_test():
 
 if __name__ == "__main__":
     ## Test à faire : sans délai
-    datareader = True
-    delay = False
-    importance = False
-    nb_features = 40
 
-    xgb_test()
-    # run_test(datareader, delay, importance, nb_features)
+
+    # xgb_test()
+    run_test()
