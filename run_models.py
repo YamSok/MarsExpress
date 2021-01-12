@@ -162,19 +162,19 @@ def run_test():
     for datareader in [True, False]:
 
         X_train, X_test, y_train, y_test = generate_train_data("chrono", datareader)
-            if datareader:
-                X_train = add_delays(X_train, 4)
-            # if importance:
-            #     importance_tab = load("importance")
-            #     X_train = X_train[importance_tab[:nb_features]]
-            n,p = X_train.shape
+        if datareader:
+            X_train = add_delays(X_train, 4)
+        # if importance:
+        #     importance_tab = load("importance")
+        #     X_train = X_train[importance_tab[:nb_features]]
+        n,p = X_train.shape
         ## Output
         delay_str = "delay_" if datareader else ""
         datareader_str = "datareader_" if datareader else ""
         # importance_str = f"{nb_features}best_features_" if importance else ""
         # params = f"{n_estimators}estimators_{p}variables_{datareader_str}{importance_str}{delay_str}"
         params = f"{datareader_str}"
-
+        n_estimators = 500
 
         print("Training model : "), 
         # print("> Number of variables :", p)
