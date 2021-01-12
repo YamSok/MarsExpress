@@ -62,9 +62,9 @@ def get_all_models(estimators, power_lines, X_list, train_all, feature_dict=None
                 models[w].append(e)
     return models
 
-X_train, X_test, y_train, y_test = generate_train_data("chrono", True)
-X_train = add_delays(X_train, 4)
-X_test = add_delays(X_test, 4)
+X_train, X_test, y_train, y_test = generate_train_data("chrono", False)
+# X_train = add_delays(X_train, 4)
+# X_test = add_delays(X_test, 4)
 
 train_all = import_data()
 
@@ -110,4 +110,4 @@ importance_str = f"{40}best_features_"
 params = f"{n_estimators}estimators_{40}variables_{datareader_str}{importance_str}{delay_str}_test"
 
 
-submission.to_pickle(f"final_results/predictions_xgboost_datareader.p")
+submission.to_pickle(f"final_results/predictions_xgboost.p")
