@@ -92,7 +92,7 @@ power_lines = y_train.columns
 #     importances = imp_per_w
 
 importances = features
-models=get_all_models(['booster'], power_lines, [X_train], train_all, importances, 40)
+models=get_all_models(['booster'], power_lines, [X_train], train_all, None, None)
 predictions  = {}
 submission = y_test.copy()
 submission.index = y_test.index
