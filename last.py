@@ -63,34 +63,35 @@ def get_all_models(estimators, power_lines, X_list, train_all, feature_dict=None
     return models
 
 X_train, X_test, y_train, y_test = generate_train_data("chrono", True)
-X_train = add_delays(X_train, 4)
-X_test = add_delays(X_test, 4)
+# X_train = add_delays(X_train, 4)
+# X_test = add_delays(X_test, 4)
 
 train_all = import_data()
 
 features = X_train.columns
 power_lines = y_train.columns
 
-try:
-    # Check if pickle is already there
-    importances = load("importances.pickle") 
-except IOError:
-    # Get Extra Trees models, one per power line, just to see feature importances
-    models=get_all_models(['xtrees'], power_lines, [X_train[features]], train_all)
-    imp_per_w = {}
+# try:
+#     # Check if pickle is already there
+#     importances = load("importances.pickle") 
+# except IOError:
+#     # Get Extra Trees models, one per power line, just to see feature importances
+#     models=get_all_models(['xtrees'], power_lines, [X_train[features]], train_all)
+#     imp_per_w = {}
     
-    # Get importances
-    for i in power_lines:
-        imp = models[i][0].feature_importances_
-        imp_per_w[i] = []
-        indices = np.argsort(imp)[::-1]
-        for f in range(X_train[features].shape[1]):
-            imp_per_w[i].append(list(X_train.columns)[indices[f]])
+#     # Get importances
+#     for i in power_lines:
+#         imp = models[i][0].feature_importances_
+#         imp_per_w[i] = []
+#         indices = np.argsort(imp)[::-1]
+#         for f in range(X_train[features].shape[1]):
+#             imp_per_w[i].append(list(X_train.columns)[indices[f]])
             
-    # Sorted Feature importances are dumped to a pickle file
-    dump(imp_per_w, "importances.pickle")
-    importances = imp_per_w
+#     # Sorted Feature importances are dumped to a pickle file
+#     dump(imp_per_w, "importances.pickle")
+#     importances = imp_per_w
 
+importances = features
 models=get_all_models(['booster'], power_lines, [X_train], train_all, importances, 40)
 predictions  = {}
 submission = y_test.copy()
@@ -99,7 +100,7 @@ for w in power_lines:
     predictions[w] = X_test[['ut']]
     for idx, est in enumerate(models[w]):
         m = "model_%d"%idx
-        predictions[w][m]=est.predict(X_test[importances[w][:40]].astype(float))
+        predictions[w][m]=est.predict(X_test[importances[w]].astype(float))
     submission[w] = predictions[w][[x for x in predictions[w].columns if 'model' in x]].mean(axis=1)
 
 n_estimators = 500
@@ -110,4 +111,4 @@ importance_str = f"{40}best_features_"
 params = f"{n_estimators}estimators_{40}variables_{datareader_str}{importance_str}{delay_str}_test"
 
 
-submission.to_pickle(f"final_results/predictions_xgboost_datareader.p")
+submission.to_pickle(f"final_results/predictions_xgboost.p")
